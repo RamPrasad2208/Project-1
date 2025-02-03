@@ -1,0 +1,200 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_DOCTORS 100
+#define MAX_PATIENTS 100
+#define MAX_APPOINTMENTS 100
+#define MAX_TESTS 100
+typedef struct {
+    char name[50];
+    char specialization[50];
+    int experience;
+} Doctor;
+typedef struct {
+    char name[50];
+    int age;
+    char disease[50];
+    float consultation_fee;
+    float test_cost;
+    int stay_days;
+    float stay_cost;
+} Patient;
+typedef struct {
+    char patientName[50];
+    char doctorName[50];
+    char appointmentDate[20];
+} Appointment;
+typedef struct {
+    char testName[50];
+    float cost;
+} Test;
+Doctor doctors[MAX_DOCTORS];
+Patient patients[MAX_PATIENTS];
+Appointment appointments[MAX_APPOINTMENTS];
+Test tests[MAX_TESTS] = { {"Blood Test", 500}, {"X-Ray", 700}, {"MRI", 2500} };
+int doctorCount = 0, patientCount = 0, appointmentCount = 0;
+void addDoctor();
+void viewDoctors();
+void addPatient();
+void viewPatients();
+void scheduleAppointment();
+void viewAppointments();
+void assignTests();
+void generateBill();
+void saveData();
+void loadData();
+int main() {
+    loadData();  // Load saved data on startup
+    int choice;
+    while (1) {
+        printf("\nHospital Management System\n");
+        printf("1. Manage Doctors\n2. Manage Patients\n3. Appointment Scheduling\n");
+        printf("4. Test Management\n5. Billing System\n6. Exit\nEnter your choice: ");
+        scanf("%d", &choice)
+        switch (choice) {
+            case 1:
+                printf("1. Add Doctor\n2. View Doctors\nEnter choice: ");
+                scanf("%d", &choice);
+                if (choice == 1) addDoctor();
+                else viewDoctors();
+                break;
+            case 2:
+                printf("1. Add Patient\n2. View Patients\nEnter choice: ");
+                scanf("%d", &choice);
+                if (choice == 1) addPatient();
+                else viewPatients();
+                break;
+            case 3:
+                printf("1. Schedule Appointment\n2. View Appointments\nEnter choice: ");
+                scanf("%d", &choice);
+                if (choice == 1) scheduleAppointment();
+                else viewAppointments();
+                break;
+            case 4:
+                assignTests();
+                break;
+            case 5:
+                generateBill();
+                break;
+            case 6:
+                saveData(); // Save data before exiting
+                printf("Exiting...\n");
+                exit(0);
+            default:
+                printf("Invalid choice! Try again.\n");
+        }
+    }
+}
+void addDoctor() {
+    if (doctorCount >= MAX_DOCTORS) {
+        printf("Doctor list full!\n");
+        return;
+    }
+    printf("Enter Doctor Name: ");
+    scanf("%s", doctors[doctorCount].name);
+    printf("Enter Specialization: ");
+    scanf("%s", doctors[doctorCount].specialization);
+    printf("Enter Experience (years): ");
+    scanf("%d", &doctors[doctorCount].experience);
+    
+    doctorCount++;
+    printf("Doctor added successfully!\n");
+}
+void viewDoctors() {
+    printf("Doctors List:\n");
+    for (int i = 0; i < doctorCount; i++) {
+        printf("%d. %s | %s | %d years experience\n", i + 1, doctors[i].name, doctors[i].specialization, doctors[i].experience);
+    }
+}
+void addPatient() {
+    if (patientCount >= MAX_PATIENTS) {
+        printf("Patient list full!\n");
+        return;
+    }
+    printf("Enter Patient Name: ");
+    scanf("%s", patients[patientCount].name);
+    printf("Enter Age: ");
+    scanf("%d", &patients[patientCount].age);
+    printf("Enter Disease: ");
+    scanf("%s", patients[patientCount].disease);
+    patients[patientCount].consultation_fee = 1000.0;  // Default consultation fee
+    patients[patientCount].test_cost = 0.0;
+    patients[patientCount].stay_days = 0;
+    patients[patientCount].stay_cost = 0.0;
+
+    patientCount++;
+    printf("Patient added successfully!\n");
+}
+void viewPatients() {
+    printf("Patients List:\n");
+    for (int i = 0; i < patientCount; i++) {
+        printf("%d. %s | Age: %d | Disease: %s\n", i + 1, patients[i].name, patients[i].age, patients[i].disease);
+    }
+}
+void scheduleAppointment() {
+    if (appointmentCount >= MAX_APPOINTMENTS) {
+        printf("No more appointments can be scheduled!\n");
+        return;
+    }
+    printf("Enter Patient Name: ");
+    scanf("%s", appointments[appointmentCount].patientName);
+    printf("Enter Appointment Date (DD/MM/YYYY): ");
+    scanf("%s", appointments[appointmentCount].appointmentDate)
+    viewDoctors();
+    printf("Assign Doctor (Enter Doctor Name): ");
+    scanf("%s", appointments[appointmentCount].doctorName);
+    appointmentCount++;
+    printf("Appointment scheduled successfully!\n");
+}
+void viewAppointments() {
+    printf("Scheduled Appointments:\n");
+    for (int i = 0; i < appointmentCount; i++) {
+        printf("%d. Patient: %s | Doctor: %s | Date: %s\n", i + 1, appointments[i].patientName, appointments[i].doctorName, appointments[i].appointmentDate);
+    }
+}
+void assignTests() {
+    char patientName[50];
+    int choice;
+    printf("Enter Patient Name: ");
+    scanf("%s", patientName);
+    for (int i = 0; i < MAX_TESTS; i++) {
+        printf("%d. %s - Rs %.2f\n", i + 1, tests[i].testName, tests[i].cost);
+    }
+    printf("Enter Test Number to Assign: ");
+    scanf("%d", &choice);
+    if (choice >= 1 && choice <= MAX_TESTS) {
+        printf("Test assigned: %s\n", tests[choice - 1].testName);
+    } else {
+        printf("Invalid choice!\n");
+    }
+}
+void generateBill() {
+    char patientName[50];
+    printf("Enter Patient Name for Billing: ");
+    scanf("%s", patientName);
+    printf("\nFinal Bill for %s:\n", patientName);
+    printf("Consultation Fee: Rs 1000.00\n");
+    printf("Tests Cost: Rs 1200.00\n");
+    printf("Hospital Stay Charges: Rs 800.00\n");
+    printf("--------------------------------------\n");
+    printf("Total Bill: Rs 3000.00\n");
+}
+void saveData() {
+    FILE *file = fopen("hospital_data.dat", "wb");
+    fwrite(&doctorCount, sizeof(int), 1, file);
+    fwrite(doctors, sizeof(Doctor), doctorCount, file);
+    fwrite(&patientCount, sizeof(int), 1, file);
+    fwrite(patients, sizeof(Patient), patientCount, file);
+    fclose(file);
+}
+void loadData() {
+    FILE *file = fopen("hospital_data.dat", "rb");
+    if (file) {
+        fread(&doctorCount, sizeof(int), 1, file);
+        fread(doctors, sizeof(Doctor), doctorCount, file);
+        fread(&patientCount, sizeof(int), 1, file);
+        fread(patients, sizeof(Patient), patientCount, file);
+        fclose(file);
+    }
+}
